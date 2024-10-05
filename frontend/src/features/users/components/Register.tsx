@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Avatar, Box, Container, Grid, TextField, Typography } from "@mui/material";
+import React, {useState} from 'react';
+import {useNavigate} from "react-router-dom";
+import {Avatar, Box, Container, Grid, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { LoadingButton } from "@mui/lab";
 import FileInput from "../../../components/FileInput/FileInput";
-import { RegisterMutation } from "../../../types";
+import {LoadingButton} from "@mui/lab";
+import {RegisterMutation} from "../../../types";
 
 const initialFormState: RegisterMutation = {
     email: '',
@@ -13,23 +14,24 @@ const initialFormState: RegisterMutation = {
 };
 
 const Register = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState<RegisterMutation>(initialFormState);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const {name, value} = event.target;
+        setFormData(prev => ({...prev, [name]: value}));
     };
 
     const fileInputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, files } = e.target;
+        const {name, files} = e.target;
         const file = files && files[0] ? files[0] : null;
-        setFormData(prev => ({ ...prev, [name]: file }));
+        setFormData(prev => ({...prev, [name]: file}));
     };
 
-    const submitFormHandler = (event: React.FormEvent) => {
+    const submitFormHandler = async (event: React.FormEvent) => {
         event.preventDefault();
         console.log(formData);
-        setFormData(initialFormState);
+        await navigate('/');
     };
 
     return (
@@ -40,18 +42,18 @@ const Register = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
             }}>
-                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                    <LockOutlinedIcon />
+                <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
+                    <LockOutlinedIcon/>
                 </Avatar>
                 <Typography component="h1" variant="h5">
                     Sign up
                 </Typography>
-                <Box component='form' sx={{ mt: 3 }} onSubmit={submitFormHandler}>
+                <Box component='form' sx={{mt: 3}} onSubmit={submitFormHandler}>
                     <Grid container spacing={2}>
                         {[
-                            { label: 'Email', type: 'email', name: 'email', value: formData.email },
-                            { label: 'Username', type: 'text', name: 'username', value: formData.username },
-                            { label: 'Password', type: 'password', name: 'password', value: formData.password },
+                            {label: 'Email', type: 'email', name: 'email', value: formData.email},
+                            {label: 'Username', type: 'text', name: 'username', value: formData.username},
+                            {label: 'Password', type: 'password', name: 'password', value: formData.password},
                         ].map((field, index) => (
                             <Grid item xs={12} key={index}>
                                 <TextField
@@ -79,7 +81,7 @@ const Register = () => {
                                 color="secondary"
                                 variant="contained"
                                 fullWidth
-                                sx={{ mb: 2 }}
+                                sx={{mb: 2}}
                             >
                                 Sign Up
                             </LoadingButton>

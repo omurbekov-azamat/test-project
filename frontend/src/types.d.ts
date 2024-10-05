@@ -21,3 +21,14 @@ export interface LoginMutation {
     email: string;
     password: string;
 }
+
+export interface User {
+    _id: string;
+    email: string;
+    username: string;
+    image: string;
+    token: string;
+}
+export interface RegisterResponse {
+    user: User;
+}

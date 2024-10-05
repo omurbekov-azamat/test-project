@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {useNavigate} from "react-router-dom";
 import { Avatar, Box, Container, Grid, TextField, Typography } from "@mui/material";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { LoadingButton } from "@mui/lab";
@@ -10,6 +11,7 @@ const initialState: LoginMutation = {
 };
 
 const Login = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState<LoginMutation>(initialState);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,10 +19,10 @@ const Login = () => {
         setFormData(prevState => ({ ...prevState, [name]: value }));
     };
 
-    const submitFormHandler = (event: React.FormEvent) => {
+    const submitFormHandler = async (event: React.FormEvent) => {
         event.preventDefault();
         console.log(formData);
-        setFormData(initialState);
+        await navigate('/');
     };
 
     return (

@@ -1,5 +1,7 @@
 import React from 'react';
 import {AppBar, Container, Grid, Toolbar, Typography} from "@mui/material";
+import AnonymousMenu from "./AnonymousMenu";
+import {Link} from '../../../helpers';
 
 const AppToolbar = () => {
     return (
@@ -8,8 +10,9 @@ const AppToolbar = () => {
                 <Toolbar>
                     <Grid container justifyContent='space-between' alignItems="center">
                         <Typography variant="h6" component="div">
-                            Chat
+                            <Link to='/'>Chat</Link>
                         </Typography>
+                        <Grid item><AnonymousMenu/></Grid>
                     </Grid>
                 </Toolbar>
             </Container>

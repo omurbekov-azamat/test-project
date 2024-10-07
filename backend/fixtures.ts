@@ -1,5 +1,6 @@
 import mysql, {Connection} from 'mysql2/promise';
 import config from './config'
+import bcrypt from "bcrypt";
 
 let connection: Connection | null = null;
 
@@ -45,7 +46,9 @@ const mysqlDb = {
           username VARCHAR(50) UNIQUE,
           email VARCHAR(255) UNIQUE,
           password VARCHAR(255),
-          image VARCHAR(255)
+          image VARCHAR(255),
+          token VARCHAR(255),
+          online BOOLEAN DEFAULT true
         );
       `);
             console.log('Table "users" created');
@@ -56,12 +59,16 @@ const mysqlDb = {
 
     async insertFixtures() {
         try {
+            const password1 = await bcrypt.hash('123', 10);
+            const password2 = await bcrypt.hash('123', 10);
+
             await connection!.query(`
-        INSERT INTO users (username, email, password, image)
-        VALUES 
-          ('user1', 'user1@test.com', '123', '1.jpg'),
-          ('user2', 'user2@test.com', '123', '2.jpg');
-      `);
+                INSERT INTO users (username, email, password, image, token, online)
+                VALUES 
+                    ('user1', 'user1@test.com', ?, '1.jpg', '123', true),
+                    ('user2', 'user2@test.com', ?, '2.jpg', '12345', true);
+            `, [password1, password2]);
+
             console.log('Fixtures inserted');
         } catch (error) {
             console.error('Error inserting fixtures:', error);

@@ -1,16 +1,15 @@
-import mysql, {Connection} from 'mysql2';
-import config from './config'
+import mysql, { Pool } from 'mysql2/promise';
+import config from './config';
 
-let connection: Connection | null = null;
+let pool: Pool;
 
 const mysqlDb = {
     async init() {
-        connection = await mysql.createConnection(config.db);
+        pool = mysql.createPool(config.db);
     },
-    getConnection(): Connection {
-        if (!connection) throw new Error('Connection failed');
-        return connection;
+    getConnection(): Promise<mysql.PoolConnection> {
+        return pool.getConnection();
     }
-}
+};
 
 export default mysqlDb;

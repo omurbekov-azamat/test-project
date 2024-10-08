@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {useNavigate} from "react-router-dom";
-import { Avatar, Box, Container, Grid, TextField, Typography } from "@mui/material";
+import {Avatar, Box, Container, Grid, TextField, Typography} from "@mui/material";
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import { LoadingButton } from "@mui/lab";
-import { LoginMutation } from "../../../types";
-import {useAppDispatch} from "../../../app/hook";
+import {LoadingButton} from "@mui/lab";
+import {useAppDispatch, useAppSelector} from "../../../app/hook";
 import {login} from "../usersThunks";
+import {selectLoginError, selectLoginLoading} from "../usersSlice";
+import {LoginMutation} from "../../../types";
 
 const initialState: LoginMutation = {
     email: '',
@@ -15,17 +16,26 @@ const initialState: LoginMutation = {
 const Login = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const error = useAppSelector(selectLoginError);
+    const loading = useAppSelector(selectLoginLoading);
     const [formData, setFormData] = useState<LoginMutation>(initialState);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = event.target;
-        setFormData(prevState => ({ ...prevState, [name]: value }));
+        const {name, value} = event.target;
+        setFormData(prevState => ({...prevState, [name]: value}));
+    };
+
+    const getFieldError = (fieldName: string) => {
+        return error?.[fieldName];
     };
 
     const submitFormHandler = async (event: React.FormEvent) => {
         event.preventDefault();
-        await dispatch(login(formData)).unwrap;
-        await navigate('/');
+        try {
+            await dispatch(login({loginMutation: formData, navigate})).unwrap();
+        } catch (error) {
+            console.error("login failed:", error);
+        }
     };
 
     return (
@@ -36,39 +46,48 @@ const Login = () => {
                 flexDirection: 'column',
                 alignItems: 'center',
             }}>
-                <Avatar sx={{ m: 1, bgcolor: 'red' }}>
-                    <LockOpenIcon />
+                <Avatar sx={{m: 1, bgcolor: 'red'}}>
+                    <LockOpenIcon/>
                 </Avatar>
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                <Box component="form" onSubmit={submitFormHandler} sx={{ mt: 3 }}>
+                <Box component="form" onSubmit={submitFormHandler} sx={{mt: 3}}>
                     <Grid container spacing={2}>
-                        {[
-                            { label: 'Email', name: 'email', type: 'email', value: formData.email },
-                            { label: 'Password', name: 'password', type: 'password', value: formData.password },
-                        ].map((field, index) => (
-                            <Grid item xs={12} key={index}>
-                                <TextField
-                                    label={field.label}
-                                    name={field.name}
-                                    type={field.type}
-                                    variant="standard"
-                                    autoComplete={`current-${field.name}`}
-                                    value={field.value}
-                                    onChange={handleInputChange}
-                                    required
-                                    fullWidth
-                                />
-                            </Grid>
-                        ))}
+                        <Grid item xs={12}>
+                            <TextField
+                                label='email'
+                                type='email'
+                                name='email'
+                                autoComplete='new-email'
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                error={Boolean(getFieldError('email'))}
+                                helperText={getFieldError('email')}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label='password'
+                                type='password'
+                                name='password'
+                                autoComplete='password'
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                error={Boolean(getFieldError('password'))}
+                                helperText={getFieldError('password')}
+                                required
+                            />
+                        </Grid>
                         <Grid item xs={12}>
                             <LoadingButton
                                 type="submit"
                                 color="primary"
                                 variant="contained"
                                 fullWidth
-                                sx={{ mb: 2 }}
+                                sx={{mb: 2}}
+                                loading={loading}
                             >
                                 Sign in
                             </LoadingButton>

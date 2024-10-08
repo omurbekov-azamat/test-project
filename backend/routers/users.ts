@@ -23,7 +23,7 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
             if (req.file) {
                 await fs.unlink(req.file.path);
             }
-            res.status(400).json({error: 'Username already exists. Please choose another one.'});
+            res.status(400).json({username: 'Username already exists.'});
             return;
         }
 
@@ -36,7 +36,7 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
             if (req.file) {
                 await fs.unlink(req.file.path);
             }
-            res.status(400).json({error: 'Email already exists. Please choose another one.'});
+            res.status(400).json({email: 'Email already exists'});
             return;
         }
 
@@ -82,14 +82,14 @@ usersRouter.post('/sessions', async (req, res, next) => {
         const findUser = rows[0] as RowDataPacket;
 
         if (!findUser) {
-            res.status(400).send({error: 'User is not found!'});
+            res.status(400).send({email: 'Email is not found!'});
             return;
         }
 
         const isMatch = await bcrypt.compare(req.body.password, findUser.password);
 
         if (!isMatch) {
-            res.status(400).send({error: 'Password is wrong'});
+            res.status(400).send({password: 'Password is wrong'});
             return;
         }
 

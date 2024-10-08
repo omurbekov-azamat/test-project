@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import {register} from "../usersThunks";
-import {useAppDispatch} from "../../../app/hook";
+import {useAppDispatch, useAppSelector} from "../../../app/hook";
 import {Avatar, Box, Container, Grid, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import FileInput from "../../../components/FileInput/FileInput";
 import {LoadingButton} from "@mui/lab";
 import {RegisterMutation} from "../../../types";
+import {selectRegisterError, selectRegisterLoading} from "../usersSlice";
 
 const initialFormState: RegisterMutation = {
     email: '',
@@ -18,6 +19,9 @@ const initialFormState: RegisterMutation = {
 const Register = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const error = useAppSelector(selectRegisterError);
+    const loading = useAppSelector(selectRegisterLoading);
+
     const [formData, setFormData] = useState<RegisterMutation>(initialFormState);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +33,10 @@ const Register = () => {
         const {name, files} = e.target;
         const file = files && files[0] ? files[0] : null;
         setFormData(prev => ({...prev, [name]: file}));
+    };
+
+    const getFieldError = (fieldName: string) => {
+        return error?.[fieldName];
     };
 
     const submitFormHandler = async (event: React.FormEvent) => {
@@ -57,26 +65,48 @@ const Register = () => {
                 </Typography>
                 <Box component='form' sx={{mt: 3}} onSubmit={submitFormHandler}>
                     <Grid container spacing={2}>
-                        {[
-                            {label: 'Email', type: 'email', name: 'email', value: formData.email},
-                            {label: 'Username', type: 'text', name: 'username', value: formData.username},
-                            {label: 'Password', type: 'password', name: 'password', value: formData.password},
-                        ].map((field, index) => (
-                            <Grid item xs={12} key={index}>
-                                <TextField
-                                    label={field.label}
-                                    type={field.type}
-                                    name={field.name}
-                                    value={field.value}
-                                    onChange={handleInputChange}
-                                    required
-                                    fullWidth
-                                />
-                            </Grid>
-                        ))}
+                        <Grid item xs={12}>
+                            <TextField
+                                label='email'
+                                type='email'
+                                name='email'
+                                autoComplete='new-email'
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                error={Boolean(getFieldError('email'))}
+                                helperText={getFieldError('email')}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label='username'
+                                type='username'
+                                name='username'
+                                autoComplete='new-username'
+                                value={formData.username}
+                                onChange={handleInputChange}
+                                error={Boolean(getFieldError('username'))}
+                                helperText={getFieldError('username')}
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label='password'
+                                type='password'
+                                name='password'
+                                autoComplete='password'
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                error={Boolean(getFieldError('password'))}
+                                helperText={getFieldError('password')}
+                                required
+                            />
+                        </Grid>
                         <Grid item xs={12}>
                             <FileInput
-                                label="Avatar"
+                                label="avatar"
                                 name="image"
                                 onChange={fileInputChangeHandler}
                                 type="images/*"
@@ -86,6 +116,7 @@ const Register = () => {
                             <LoadingButton
                                 type="submit"
                                 color="secondary"
+                                loading={loading}
                                 variant="contained"
                                 fullWidth
                                 sx={{mb: 2}}

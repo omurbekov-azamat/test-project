@@ -29,13 +29,21 @@ export const register = createAsyncThunk<User, RegisterMutation, { rejectValue: 
     }
 );
 
-export const login = createAsyncThunk<User, LoginMutation>(
+export const login = createAsyncThunk<
+    User,
+    { loginMutation: LoginMutation, navigate: Function },
+    { rejectValue: ValidationError }
+>(
     'users/login',
-    async (loginMutation) => {
+    async ({ loginMutation, navigate }, { rejectWithValue }) => {
         try {
             const response = await axiosApi.post<RegisterResponse>('/users/sessions', loginMutation);
+            await navigate('/');
             return response.data.user;
         } catch (e) {
+            if (isAxiosError(e) && e.response && e.response.status === 400) {
+                return rejectWithValue(e.response.data as ValidationError);
+            }
             throw e;
         }
     }

@@ -48,7 +48,19 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
         );
 
         if (result.affectedRows > 0) {
-            res.status(201).json({message: 'User created successfully', userId: result.insertId});
+            const user = {
+                id: result.insertId,
+                email,
+                username,
+                image,
+                online: true,
+                token: crypto.randomUUID(),
+            };
+
+            res.status(201).json({
+                message: 'User created successfully',
+                user,
+            });
             return;
         } else {
             res.status(400).json({error: 'User creation failed'});
@@ -67,29 +79,27 @@ usersRouter.post('/sessions', async (req, res, next) => {
         connection = await mysqlDb.getConnection();
 
         const [rows]: [RowDataPacket[], any] = await connection.query('SELECT * FROM users WHERE email = ?', [req.body.email]);
-        const user = rows[0] as RowDataPacket;
+        const findUser = rows[0] as RowDataPacket;
 
-        if (!user) {
+        if (!findUser) {
             res.status(400).send({error: 'User is not found!'});
             return;
         }
 
-        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        const isMatch = await bcrypt.compare(req.body.password, findUser.password);
 
         if (!isMatch) {
             res.status(400).send({error: 'Password is wrong'});
-            return
+            return;
         }
 
         const token = crypto.randomUUID();
-        await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?', [true, token, user.id]);
+        await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?', [true, token, findUser.id]);
 
-        const updatedUser = {
-            token: crypto.randomUUID(),
-            online: true,
-        };
+        const {id, email, username, image} = findUser;
+        const user = {id, email, username, image, online: true, token};
 
-        res.send({message: 'Username and password correct', user: updatedUser});
+        res.send({message: 'Username and password correct', user});
         return;
     } catch (error) {
         return next(error);

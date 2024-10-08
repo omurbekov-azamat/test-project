@@ -28,6 +28,7 @@ export interface User {
     username: string;
     image: string;
     token: string;
+    online: boolean;
 }
 export interface RegisterResponse {
     user: User;

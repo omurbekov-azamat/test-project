@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import {useNavigate} from "react-router-dom";
+import {register} from "../usersThunks";
+import {useAppDispatch} from "../../../app/hook";
 import {Avatar, Box, Container, Grid, TextField, Typography} from "@mui/material";
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import FileInput from "../../../components/FileInput/FileInput";
@@ -14,6 +16,7 @@ const initialFormState: RegisterMutation = {
 };
 
 const Register = () => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const [formData, setFormData] = useState<RegisterMutation>(initialFormState);
 
@@ -30,8 +33,12 @@ const Register = () => {
 
     const submitFormHandler = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log(formData);
-        await navigate('/');
+        try {
+            await dispatch(register(formData)).unwrap();
+            navigate('/');
+        } catch (error) {
+            console.error("Registration failed:", error);
+        }
     };
 
     return (

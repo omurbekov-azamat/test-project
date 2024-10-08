@@ -4,6 +4,8 @@ import { Avatar, Box, Container, Grid, TextField, Typography } from "@mui/materi
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { LoadingButton } from "@mui/lab";
 import { LoginMutation } from "../../../types";
+import {useAppDispatch} from "../../../app/hook";
+import {login} from "../usersThunks";
 
 const initialState: LoginMutation = {
     email: '',
@@ -11,6 +13,7 @@ const initialState: LoginMutation = {
 };
 
 const Login = () => {
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const [formData, setFormData] = useState<LoginMutation>(initialState);
 
@@ -21,7 +24,7 @@ const Login = () => {
 
     const submitFormHandler = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log(formData);
+        await dispatch(login(formData)).unwrap;
         await navigate('/');
     };
 

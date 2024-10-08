@@ -1,10 +1,11 @@
 import {createSlice} from "@reduxjs/toolkit";
 import {login, logout, register} from "./usersThunks";
-import {User} from "../../types";
+import {User, ValidationError} from "../../types";
 
 interface UsersState {
     user: User | null;
     registerLoading: boolean,
+    registerError: ValidationError | null,
     loginLoading: boolean,
     logoutLoading: boolean,
 }
@@ -12,6 +13,7 @@ interface UsersState {
 const initialState: UsersState = {
     user: null,
     registerLoading: false,
+    registerError: null,
     loginLoading: false,
     logoutLoading: false,
 }
@@ -30,6 +32,7 @@ export const usersSlice = createSlice({
         });
         builder.addCase(register.rejected, (state, {payload: error}) => {
             state.registerLoading = false;
+            state.registerError = error || null;
         });
         builder.addCase(login.pending, (state) => {
             state.loginLoading = true;

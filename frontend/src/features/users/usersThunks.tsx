@@ -56,11 +56,12 @@ export const logout = createAsyncThunk<void, string>(
     }
 );
 
-export const getUsers = createAsyncThunk<User[]>(
+export const getUsers = createAsyncThunk<User[], string | null>(
     'users/getUsers',
-    async () => {
+    async (token) => {
         try {
-            const users = await axiosApi.get<User[]>('/users');
+            const users = await axiosApi.get<User[]>('/users',
+                {headers: {'Authorization': token}});
             return users.data;
         } catch (e) {
             throw e;

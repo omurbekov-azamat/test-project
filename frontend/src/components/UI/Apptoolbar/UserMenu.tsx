@@ -15,6 +15,7 @@ const UserMenu: React.FC<Props> = ({user}) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const loading = useAppSelector(selectLogoutLoading);
+    const token = user?.token || null;
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
@@ -28,7 +29,7 @@ const UserMenu: React.FC<Props> = ({user}) => {
 
     const handleLogout = async () => {
         await dispatch(logout(user.token));
-        await dispatch(getUsers());
+        await dispatch(getUsers(token));
         await navigate('/');
     };
 

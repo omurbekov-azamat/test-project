@@ -1,4 +1,5 @@
 import React from 'react';
+import {NavLink} from "react-router-dom";
 import { Avatar, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import { apiURL } from "../../../constants";
 import { User } from "../../../types";
@@ -27,6 +28,8 @@ const ListUser: React.FC<Props> = ({ user }) => {
                     backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 },
             }}
+            component={NavLink}
+            to={'/' + user.id}
         >
             <ListItemAvatar>
                 <Avatar alt={user.username} src={image} />

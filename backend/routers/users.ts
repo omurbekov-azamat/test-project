@@ -14,10 +14,7 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
         const {email, username, password} = req.body;
         const image = req.file ? req.file.filename : null;
 
-        const [existingUser]: any = await connection.query(
-            'SELECT * FROM users WHERE username = ?',
-            [username]
-        );
+        const [existingUser]: any = await connection.query('SELECT * FROM users WHERE username = ?', [username]);
 
         if (existingUser.length > 0) {
             if (req.file) {
@@ -27,10 +24,7 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
             return;
         }
 
-        const [existingEmail]: any = await connection.query(
-            'SELECT * FROM users WHERE email = ?',
-            [email]
-        );
+        const [existingEmail]: any = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
 
         if (existingEmail.length > 0) {
             if (req.file) {
@@ -45,8 +39,7 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
 
         const [result] = await connection.query<OkPacket>(
             'INSERT INTO users (email, password, username, image, online, token) VALUES (?, ?, ?, ?, ?, ?)',
-            [email, hashedPassword, username, image, true, token],
-        );
+            [email, hashedPassword, username, image, true, token],);
 
         if (result.affectedRows > 0) {
             const user = {
@@ -79,7 +72,8 @@ usersRouter.post('/sessions', async (req, res, next) => {
     try {
         connection = await mysqlDb.getConnection();
 
-        const [rows]: [RowDataPacket[], any] = await connection.query('SELECT * FROM users WHERE email = ?', [req.body.email]);
+        const [rows]: [RowDataPacket[], any] = await connection.query('SELECT * FROM users WHERE email = ?',
+            [req.body.email]);
         const findUser = rows[0] as RowDataPacket;
 
         if (!findUser) {
@@ -95,7 +89,8 @@ usersRouter.post('/sessions', async (req, res, next) => {
         }
 
         const token = crypto.randomUUID();
-        await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?', [true, token, findUser.id]);
+        await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?',
+            [true, token, findUser.id]);
 
         const {id, email, username, image} = findUser;
         const user = {id, email, username, image, online: true, token};
@@ -123,7 +118,8 @@ usersRouter.delete('/sessions', async (req, res, next) => {
         }
 
         connection = await mysqlDb.getConnection();
-        const [userResult, _fields]: [RowDataPacket[], FieldPacket[]] = await connection.query('SELECT * FROM users WHERE token = ?', [token]);
+        const [userResult, _fields]: [RowDataPacket[], FieldPacket[]] = await connection.query(
+            'SELECT * FROM users WHERE token = ?', [token]);
         const user = userResult[0];
 
         if (!user) {
@@ -132,7 +128,8 @@ usersRouter.delete('/sessions', async (req, res, next) => {
         }
 
         const newToken = crypto.randomUUID();
-        await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?', [false, newToken, user.id]);
+        await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?',
+            [false, newToken, user.id]);
 
         res.send(success);
         return;
@@ -149,8 +146,25 @@ usersRouter.get('/', async (req, res) => {
     let connection;
 
     try {
+        let users;
+        const token = req.get('Authorization');
         connection = await mysqlDb.getConnection();
-        const [users] = await connection.query('SELECT id, username, token, image, online FROM users');
+
+        if (token) {
+            const [currentUser] = await connection.query<RowDataPacket[]>(
+                'SELECT id FROM users WHERE token = ?', [token]);
+
+            if (currentUser.length > 0) {
+                [users] = await connection.query<RowDataPacket[]>(
+                    'SELECT id, username, token, image, online FROM users WHERE id != ?', [currentUser[0].id]);
+            } else {
+                [users] = await connection.query<RowDataPacket[]>(
+                    'SELECT id, username, token, image, online FROM users');
+            }
+        } else {
+            [users] = await connection.query<RowDataPacket[]>(
+                'SELECT id, username, token, image, online FROM users');
+        }
         res.send(users);
     } catch (error) {
         console.error('Error fetching users:', error);

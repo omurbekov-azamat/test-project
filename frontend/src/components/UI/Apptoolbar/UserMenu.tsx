@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {logout} from '../../../features/users/usersThunks';
+import {getUsers, logout} from '../../../features/users/usersThunks';
 import {selectLogoutLoading} from "../../../features/users/usersSlice";
 import {Avatar, Button, Grid, Menu, MenuItem} from '@mui/material';
 import {apiURL} from '../../../constants';
@@ -13,8 +13,8 @@ interface Props {
 
 const UserMenu: React.FC<Props> = ({user}) => {
     const dispatch = useAppDispatch();
-    const loading = useAppSelector(selectLogoutLoading);
     const navigate = useNavigate();
+    const loading = useAppSelector(selectLogoutLoading);
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
@@ -27,7 +27,8 @@ const UserMenu: React.FC<Props> = ({user}) => {
     };
 
     const handleLogout = async () => {
-        await dispatch(logout());
+        await dispatch(logout(user.token));
+        await dispatch(getUsers());
         await navigate('/');
     };
 

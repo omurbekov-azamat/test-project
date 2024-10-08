@@ -15,7 +15,7 @@ export interface LoginMutation {
 }
 
 export interface User {
-    _id: string;
+    id: string;
     email: string;
     username: string;
     image: string;

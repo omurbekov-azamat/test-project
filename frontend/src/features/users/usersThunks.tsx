@@ -49,9 +49,21 @@ export const login = createAsyncThunk<
     }
 );
 
-export const logout = createAsyncThunk(
+export const logout = createAsyncThunk<void, string>(
     'users/logout',
+    async (token) => {
+        await axiosApi.delete('/users/sessions', {headers: {'Authorization': token}});
+    }
+);
+
+export const getUsers = createAsyncThunk<User[]>(
+    'users/getUsers',
     async () => {
-        await axiosApi.delete('/users/sessions');
+        try {
+            const users = await axiosApi.get<User[]>('/users');
+            return users.data;
+        } catch (e) {
+            throw e;
+        }
     }
 );

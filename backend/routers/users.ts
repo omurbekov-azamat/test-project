@@ -40,11 +40,12 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
             return;
         }
 
+        const token = crypto.randomUUID();
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const [result] = await connection.query<OkPacket>(
             'INSERT INTO users (email, password, username, image, online, token) VALUES (?, ?, ?, ?, ?, ?)',
-            [email, hashedPassword, username, image, true, crypto.randomUUID()],
+            [email, hashedPassword, username, image, true, token],
         );
 
         if (result.affectedRows > 0) {
@@ -54,7 +55,7 @@ usersRouter.post('/', imagesUpload.single('image'), async (req: Request, res: Re
                 username,
                 image,
                 online: true,
-                token: crypto.randomUUID(),
+                token: token,
             };
 
             res.status(201).json({
@@ -122,9 +123,7 @@ usersRouter.delete('/sessions', async (req, res, next) => {
         }
 
         connection = await mysqlDb.getConnection();
-
         const [userResult, _fields]: [RowDataPacket[], FieldPacket[]] = await connection.query('SELECT * FROM users WHERE token = ?', [token]);
-
         const user = userResult[0];
 
         if (!user) {
@@ -151,8 +150,8 @@ usersRouter.get('/', async (req, res) => {
 
     try {
         connection = await mysqlDb.getConnection();
-        const [result] = await connection.query('SELECT * FROM users');
-        res.send(result);
+        const [users] = await connection.query('SELECT id, username, token, image, online FROM users');
+        res.send(users);
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).send({error: 'Internal server error'});

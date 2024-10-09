@@ -7,3 +7,12 @@ export interface IUser {
     online: boolean;
     token: string;
 }
+
+export interface IMessage {
+    id: string;
+    sender_id: string;
+    receiver_id: string;
+    text: string | null;
+    image: string | null;
+    createdAt: string;
+}

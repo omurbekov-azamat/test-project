@@ -1,12 +1,21 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {useAppDispatch, useAppSelector} from "../../../app/hook";
+import {getUsers} from "../../users/usersThunks";
+import {selectUser, selectUsers} from "../../users/usersSlice";
 import ListUser from "./ListUser";
 import {User} from "../../../types";
 
-interface Props {
-    users: User[];
-}
+const ListUsers = () => {
+    const dispatch = useAppDispatch();
+    const users = useAppSelector(selectUsers);
+    const user = useAppSelector(selectUser);
 
-const ListUsers: React.FC<Props> = ({users}) => {
+    useEffect(() => {
+        if (user) {
+            dispatch(getUsers(user.token));
+        }
+    }, [dispatch, user]);
+
     return (
         <>
             {users.map((user: User) => (

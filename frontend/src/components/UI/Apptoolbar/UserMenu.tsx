@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {getUsers, logout} from '../../../features/users/usersThunks';
+import {logout} from '../../../features/users/usersThunks';
 import {selectLogoutLoading} from "../../../features/users/usersSlice";
 import {Avatar, Button, Grid, Menu, MenuItem} from '@mui/material';
 import {apiURL} from '../../../constants';
@@ -15,9 +15,16 @@ const UserMenu: React.FC<Props> = ({user}) => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const loading = useAppSelector(selectLogoutLoading);
-    const token = user?.token || null;
 
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+    let image: string;
+
+    if (user.image && user.image.length < 50) {
+        image = user.image && apiURL + '/' + user.image;
+    } else {
+        image = user.image
+    }
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -29,17 +36,12 @@ const UserMenu: React.FC<Props> = ({user}) => {
 
     const handleLogout = async () => {
         await dispatch(logout(user.token));
-        await dispatch(getUsers(token));
-        await navigate('/');
     };
 
-    let image:string;
-
-    if (user.image && user.image.length < 50) {
-        image = user.image && apiURL + '/' + user.image;
-    } else {
-        image = user.image
-    }
+    const onMenuItemClick = (path: string) => {
+        navigate(path);
+        handleClose();
+    };
 
     return (
         <>
@@ -62,6 +64,7 @@ const UserMenu: React.FC<Props> = ({user}) => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
             >
+                <MenuItem onClick={() => onMenuItemClick('/my-cabinet')}>My cabinet</MenuItem>
                 <MenuItem onClick={handleLogout} disabled={loading}>Logout</MenuItem>
             </Menu>
         </>

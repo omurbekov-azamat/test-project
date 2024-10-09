@@ -1,19 +1,19 @@
-import { NextFunction, Request, Response } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import mysqlDb from '../mysqlDb';
-import { RowDataPacket } from 'mysql2/promise';
-import { IUser } from '../types';
+import {RowDataPacket} from 'mysql2/promise';
+import {IUser} from '../types';
 
 export interface RequestWithUser extends Request {
-    user: Pick<IUser, 'id' | 'email' | 'username' | 'token'>;
+    user?: Pick<IUser, 'id' | 'email' | 'username' | 'token'>;
 }
 
-const auth = async (expressReq: Request, res: Response, next: NextFunction) => {
+const auth = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     let connection;
-    const req = expressReq as RequestWithUser;
     const token = req.get('Authorization');
 
     if (!token) {
-        return res.status(401).send({ error: 'No token' });
+        res.status(401).send({error: 'No token'});
+        return;
     }
 
     try {
@@ -25,7 +25,8 @@ const auth = async (expressReq: Request, res: Response, next: NextFunction) => {
         );
 
         if (rows.length === 0) {
-            return res.status(401).send({ error: 'Wrong token!' });
+            res.status(401).send({error: 'Wrong token!'});
+            return;
         }
 
         const user = rows[0] as IUser;
@@ -37,9 +38,9 @@ const auth = async (expressReq: Request, res: Response, next: NextFunction) => {
             token: user.token,
         };
 
-        return next();
+        next();
     } catch (error) {
-        return res.status(500).send({ error: 'Internal server error' });
+        res.status(500).send({error: 'Internal server error'});
     } finally {
         if (connection) {
             connection.release();

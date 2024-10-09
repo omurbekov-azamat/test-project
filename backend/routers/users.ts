@@ -1,10 +1,11 @@
 import express, {Request, Response, NextFunction} from 'express';
-import {FieldPacket, OkPacket, RowDataPacket} from 'mysql2';
+import {OkPacket, RowDataPacket} from 'mysql2';
 import {promises as fs} from "fs";
 import {imagesUpload} from '../multer';
 import mysqlDb from '../mysqlDb';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
+import auth, {RequestWithUser} from "../middleware/auth";
 
 const usersRouter = express.Router();
 
@@ -106,33 +107,19 @@ usersRouter.post('/sessions', async (req, res, next) => {
     }
 });
 
-usersRouter.delete('/sessions', async (req, res, next) => {
+usersRouter.delete('/sessions', auth, async (req: Request, res: Response, next: NextFunction) => {
     let connection;
+
     try {
-        const token = req.get('Authorization');
-        const success = {message: 'Success'};
-
-        if (!token) {
-            res.send(success);
-            return;
-        }
-
+        const success = { message: 'Success' };
+        const user = (req as RequestWithUser).user;
         connection = await mysqlDb.getConnection();
-        const [userResult, _fields]: [RowDataPacket[], FieldPacket[]] = await connection.query(
-            'SELECT * FROM users WHERE token = ?', [token]);
-        const user = userResult[0];
-
-        if (!user) {
-            res.send(success);
-            return;
-        }
-
         const newToken = crypto.randomUUID();
+
         await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?',
-            [false, newToken, user.id]);
+            [false, newToken, user?.id]);
 
         res.send(success);
-        return;
     } catch (e) {
         return next(e);
     } finally {
@@ -142,33 +129,54 @@ usersRouter.delete('/sessions', async (req, res, next) => {
     }
 });
 
-usersRouter.get('/', async (req, res) => {
+usersRouter.get('/', auth, async (req: Request, res: Response) => {
     let connection;
 
     try {
-        let users;
-        const token = req.get('Authorization');
+        const reqWithUser = req as RequestWithUser;
+        const user = reqWithUser.user;
         connection = await mysqlDb.getConnection();
 
-        if (token) {
-            const [currentUser] = await connection.query<RowDataPacket[]>(
-                'SELECT id FROM users WHERE token = ?', [token]);
+        const [users]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
+            'SELECT id, username, token, image, online FROM users WHERE id != ?',
+            [user?.id]);
 
-            if (currentUser.length > 0) {
-                [users] = await connection.query<RowDataPacket[]>(
-                    'SELECT id, username, token, image, online FROM users WHERE id != ?', [currentUser[0].id]);
-            } else {
-                [users] = await connection.query<RowDataPacket[]>(
-                    'SELECT id, username, token, image, online FROM users');
-            }
-        } else {
-            [users] = await connection.query<RowDataPacket[]>(
-                'SELECT id, username, token, image, online FROM users');
-        }
         res.send(users);
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).send({error: 'Internal server error'});
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+});
+
+usersRouter.patch('/password', auth, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    let connection;
+
+    try {
+        const reqWithUser = req as RequestWithUser;
+        const user = reqWithUser.user;
+
+        if (!user) {
+            res.status(401).send({error: 'User not authenticated'});
+        }
+
+        const {newPassword} = req.body;
+
+        if (!newPassword) {
+            res.status(400).send({error: 'New password is required'});
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        connection = await mysqlDb.getConnection();
+        await connection.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, user?.id]);
+
+        res.send({message: 'Password changed successfully'});
+    } catch (error) {
+        next(error);
     } finally {
         if (connection) {
             connection.release();

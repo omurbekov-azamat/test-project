@@ -35,7 +35,7 @@ export const login = createAsyncThunk<
     { rejectValue: ValidationError }
 >(
     'users/login',
-    async ({ loginMutation, navigate }, { rejectWithValue }) => {
+    async ({loginMutation, navigate}, {rejectWithValue}) => {
         try {
             const response = await axiosApi.post<RegisterResponse>('/users/sessions', loginMutation);
             await navigate('/');
@@ -68,3 +68,17 @@ export const getUsers = createAsyncThunk<User[], string | null>(
         }
     }
 );
+
+export const changePass = createAsyncThunk<ValidationError, {
+    password: string,
+    token: string
+}>('users/changePassword', async (data) => {
+    try {
+        const response = await axiosApi.patch('/users/password',
+            {newPassword: data.password},
+            {headers: {'Authorization': data.token}});
+        return response.data;
+    } catch {
+        throw new Error();
+    }
+});

@@ -56,6 +56,7 @@ export const usersSlice = createSlice({
         });
         builder.addCase(logout.pending, (state) => {
             state.user = null;
+            state.users = [];
             state.logoutLoading = true;
         });
         builder.addCase(logout.fulfilled, (state) => {
@@ -85,5 +86,4 @@ export const selectRegisterError = (state: RootState) => state.users.registerErr
 export const selectLoginLoading = (state: RootState) => state.users.loginLoading;
 export const selectLoginError = (state: RootState) => state.users.loginError;
 export const selectLogoutLoading = (state: RootState) => state.users.logoutLoading;
-export const selectGetUsersLoading = (state: RootState) => state.users.getUsersLoading;
 export const selectUsers = (state: RootState) => state.users.users;

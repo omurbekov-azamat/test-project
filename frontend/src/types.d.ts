@@ -25,3 +25,9 @@ export interface User {
 export interface RegisterResponse {
     user: User;
 }
+
+export interface MessageMutation {
+    receiver_id: string;
+    text: string;
+    image: File | null;
+}

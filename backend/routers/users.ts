@@ -6,6 +6,7 @@ import mysqlDb from '../mysqlDb';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import auth, {RequestWithUser} from "../middleware/auth";
+import {IUser} from "../types";
 
 const usersRouter = express.Router();
 
@@ -111,7 +112,7 @@ usersRouter.delete('/sessions', auth, async (req: Request, res: Response, next: 
     let connection;
 
     try {
-        const success = { message: 'Success' };
+        const success = {message: 'Success'};
         const user = (req as RequestWithUser).user;
         connection = await mysqlDb.getConnection();
         const newToken = crypto.randomUUID();
@@ -138,8 +139,10 @@ usersRouter.get('/', auth, async (req: Request, res: Response) => {
         connection = await mysqlDb.getConnection();
 
         const [users]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
-            'SELECT id, username, token, image, online FROM users WHERE id != ?',
-            [user?.id]);
+            `SELECT DISTINCT u.id, u.username, u.token, u.image, u.online FROM users u
+                JOIN messages m ON (u.id = m.receiver_id OR u.id = m.sender_id)
+                WHERE (m.sender_id = ? OR m.receiver_id = ?) AND u.id != ?`,
+            [user?.id, user?.id, user?.id]);
 
         res.send(users);
     } catch (error) {
@@ -183,5 +186,49 @@ usersRouter.patch('/password', auth, async (req: Request, res: Response, next: N
         }
     }
 });
+
+usersRouter.post('/addUser', auth, async (req: Request, res: Response) => {
+    let connection;
+    try {
+        const reqWithUser = req as RequestWithUser;
+        const user = reqWithUser.user;
+        connection = await mysqlDb.getConnection();
+        const senderId = user?.id!;
+
+        const [rows]: [RowDataPacket[], any] = await connection.query(
+            'SELECT * FROM users WHERE username = ?',
+            [req.body.username]
+        );
+        const findUser = rows[0] as IUser;
+
+        if (!findUser) {
+            res.send({message: 'Username is not found!'});
+            return;
+        }
+
+        const [existingMessages]: [RowDataPacket[], any] = await connection.query(
+            'SELECT * FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)',
+            [senderId, findUser.id, findUser.id, senderId]
+        );
+
+        if (existingMessages.length > 0) {
+            res.send({message: 'Message between these users already exists'});
+            return;
+        }
+
+        await connection.query(
+            'INSERT INTO messages (sender_id, receiver_id, text) VALUES (?, ?, ?)',
+            [senderId, findUser.id, 'Hello']
+        );
+        res.send({message: 'Message sent successfully'});
+    } catch (e) {
+        console.error('Error fetching users:', e);
+        res.status(500).send({error: 'Internal server error'});
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+})
 
 export default usersRouter;

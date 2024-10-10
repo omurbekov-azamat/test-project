@@ -69,6 +69,18 @@ export const getUsers = createAsyncThunk<User[], string | null>(
     }
 );
 
+export const addUser = createAsyncThunk<void, {username: string, token: string}>(
+    'users/addChat',
+    async (data) => {
+        try {
+            await axiosApi.post<User[]>('/users/addUser', {username: data.username},
+                {headers: {'Authorization': data.token}});
+        } catch (e) {
+            throw new Error();
+        }
+    }
+);
+
 export const changePass = createAsyncThunk<ValidationError, {
     password: string,
     token: string

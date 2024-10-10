@@ -9,19 +9,18 @@ const messagesRouter = express.Router();
 
 type MessageRow = IMessage & RowDataPacket;
 
-messagesRouter.post('/:id', auth, imagesUpload.single('image'), async (req, res, next) => {
+messagesRouter.post('/', auth, imagesUpload.single('image'), async (req, res, next) => {
     try {
         const connection = await mysqlDb.getConnection();
-        const recipientId = parseInt(req.params.id);
         const reqWithUser = req as RequestWithUser;
         const user = reqWithUser.user;
         const senderId = user?.id!;
-        const {text} = req.body;
+        const {text, receiver_id} = req.body;
         const image = req.file ? req.file.filename : null;
 
         const [result] = await connection.query<OkPacket>(
             'INSERT INTO messages (sender_id, receiver_id, text, image) VALUES (?, ?, ?, ?)',
-            [senderId, recipientId, text, image],);
+            [senderId, receiver_id, text, image],);
 
         res.status(201).send({message: 'Message created successfully', messageId: result.insertId});
         return;
@@ -47,8 +46,8 @@ messagesRouter.get('/:id', auth, async (req, res) => {
         }
 
         const [messages]: [MessageRow[], any] = await connection!.query(`
-            SELECT sender_id, receiver_id, text, image,
-            DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS created_at
+            SELECT sender_id, receiver_id, text, image, id,
+            DATE_FORMAT(created_at, '%d/%m/%y %H:%i') AS created_at
             FROM messages WHERE (sender_id = ? AND receiver_id = ?)
             OR (sender_id = ? AND receiver_id = ?)
             ORDER BY created_at ASC`,

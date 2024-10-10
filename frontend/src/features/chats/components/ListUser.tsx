@@ -3,12 +3,18 @@ import {NavLink} from "react-router-dom";
 import { Avatar, ListItem, ListItemAvatar, ListItemText, Typography } from "@mui/material";
 import { apiURL } from "../../../constants";
 import { User } from "../../../types";
+import {useAppDispatch, useAppSelector} from "../../../app/hook";
+import {selectUser} from "../../users/usersSlice";
+import {getMessages} from "../../messages/messagesThunks";
 
 interface Props {
     user: User;
 }
 
 const ListUser: React.FC<Props> = ({ user }) => {
+    const dispatch = useAppDispatch();
+    const member = useAppSelector(selectUser)!;
+
     let image: string;
 
     if (user.image && user.image.length < 50) {
@@ -16,6 +22,10 @@ const ListUser: React.FC<Props> = ({ user }) => {
     } else {
         image = user.image || '';
     }
+
+    const onClick = async (id: string) => {
+        await dispatch(getMessages({ id, token: member.token }));
+    };
 
     return (
         <ListItem
@@ -30,6 +40,7 @@ const ListUser: React.FC<Props> = ({ user }) => {
             }}
             component={NavLink}
             to={'/' + user.id}
+            onClick={() => onClick(user.id)}
         >
             <ListItemAvatar>
                 <Avatar alt={user.username} src={image} />

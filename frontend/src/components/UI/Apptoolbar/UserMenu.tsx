@@ -5,6 +5,7 @@ import {selectLogoutLoading} from "../../../features/users/usersSlice";
 import {Avatar, Button, Grid, Menu, MenuItem} from '@mui/material';
 import {apiURL} from '../../../constants';
 import {useAppDispatch, useAppSelector} from "../../../app/hook";
+import {clearMessages} from "../../../features/messages/messagesSlice";
 import {User} from '../../../types';
 
 interface Props {
@@ -36,11 +37,13 @@ const UserMenu: React.FC<Props> = ({user}) => {
 
     const handleLogout = async () => {
         await dispatch(logout(user.token));
+        dispatch(clearMessages());
     };
 
     const onMenuItemClick = (path: string) => {
         navigate(path);
         handleClose();
+        dispatch(clearMessages());
     };
 
     return (

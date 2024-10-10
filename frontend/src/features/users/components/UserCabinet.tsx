@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, Card, CardContent, Grid} from "@mui/material";
+import {Box, Card, CardContent} from "@mui/material";
 import ChangePassword from "../../../components/UI/ChangePassword/ChangePassword";
 
 const UserCabinet = () => {

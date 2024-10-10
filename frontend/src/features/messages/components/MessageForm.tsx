@@ -1,13 +1,21 @@
 import React, {useEffect, useState} from 'react';
 import {useParams} from "react-router-dom";
-import FileInput from "../../components/FileInput/FileInput";
+import FileInput from "../../../components/FileInput/FileInput";
 import {ArrowCircleUpSharp} from "@mui/icons-material";
 import {Box, Grid, TextField} from "@mui/material";
 import {LoadingButton} from "@mui/lab";
-import {MessageMutation} from "../../types";
+import {MessageMutation} from "../../../types";
+import {useAppDispatch, useAppSelector} from "../../../app/hook";
+import {getMessages, sendMessage} from "../messagesThunks";
+import {selectUser} from "../../users/usersSlice";
+import {selectSendMessageLoading} from "../messagesSlice";
 
 const MessageForm = () => {
+    const dispatch = useAppDispatch();
     const {id} = useParams() as { id: string };
+    const user = useAppSelector(selectUser)!;
+    const loading = useAppSelector(selectSendMessageLoading);
+
     const [message, setMessage] = useState<MessageMutation>({
         receiver_id: id,
         text: '',
@@ -32,14 +40,15 @@ const MessageForm = () => {
     const submitForm = async (e: React.FormEvent) => {
         e.preventDefault();
         if (id) {
-            console.log(message);
             setMessage({receiver_id: id, text: '', image: null});
+            await dispatch(sendMessage({message, token: user.token}));
+            await dispatch(getMessages({ id, token: user.token }));
         }
     };
 
     return (
         id ? (
-            <Box sx={{p: 3}}>
+            <Box sx={{p: 1}}>
                 <form onSubmit={submitForm}>
                     <Grid container direction='row' spacing={2} alignItems="center">
                         <Grid item xs>
@@ -69,6 +78,7 @@ const MessageForm = () => {
                                 variant='contained'
                                 startIcon={<ArrowCircleUpSharp/>}
                                 fullWidth
+                                loading={loading}
                             >
                                 Send
                             </LoadingButton>

@@ -31,3 +31,12 @@ export interface MessageMutation {
     text: string;
     image: File | null;
 }
+
+export interface Message {
+    id: string;
+    sender_id: string;
+    receiver_id: string;
+    image: string | null;
+    text: string | null;
+    created_at: sring;
+}

@@ -52,10 +52,11 @@ const Login = () => {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                <Box component="form" onSubmit={submitFormHandler} sx={{mt: 3}}>
+                <Box component="form" onSubmit={submitFormHandler} sx={{mt: 3, maxWidth: '300px'}}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
+                                fullWidth
                                 label='email'
                                 type='email'
                                 name='email'
@@ -69,6 +70,7 @@ const Login = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
+                                fullWidth
                                 label='password'
                                 type='password'
                                 name='password'

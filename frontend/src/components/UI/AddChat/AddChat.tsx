@@ -21,6 +21,7 @@ const AddChat = () => {
     };
 
     const handleClose = () => {
+        setUsername('');
         setOpen(false);
     };
 
@@ -30,6 +31,7 @@ const AddChat = () => {
     };
 
     const handleConfirmAdd = async () => {
+        if (!username) return;
         await dispatch(addUser({username, token: user.token}))
         await dispatch(getUsers(user.token));
         setUsername('');
@@ -49,7 +51,6 @@ const AddChat = () => {
                             name='username'
                             value={username}
                             onChange={inputChangeHandler}
-                            required
                             fullWidth
                         />
                     </DialogContent>

@@ -51,7 +51,7 @@ const MessageForm = () => {
             <Box sx={{p: 1}}>
                 <form onSubmit={submitForm}>
                     <Grid container direction='row' spacing={2} alignItems="center">
-                        <Grid item xs>
+                        <Grid item xs={12} sm={12} md={12} lg={5}>
                             <TextField
                                 label='text'
                                 type='text-area'
@@ -62,7 +62,7 @@ const MessageForm = () => {
                                 fullWidth
                             />
                         </Grid>
-                        <Grid item xs>
+                        <Grid item xs={12} sm={12} md={8} lg={5}>
                             <FileInput
                                 label="image"
                                 name="image"
@@ -70,7 +70,7 @@ const MessageForm = () => {
                                 type="images/*"
                             />
                         </Grid>
-                        <Grid item xs>
+                        <Grid item xs={12} sm={12} md={4} lg={2}>
                             <LoadingButton
                                 type='submit'
                                 color='secondary'

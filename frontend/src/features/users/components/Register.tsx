@@ -55,7 +55,7 @@ const Register = () => {
                 marginTop: 8,
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
+                alignItems: 'center'
             }}>
                 <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
                     <LockOutlinedIcon/>
@@ -63,10 +63,11 @@ const Register = () => {
                 <Typography component="h1" variant="h5">
                     Sign up
                 </Typography>
-                <Box component='form' sx={{mt: 3}} onSubmit={submitFormHandler}>
+                <Box component='form' sx={{mt: 3, maxWidth: '300px'}} onSubmit={submitFormHandler}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
+                                fullWidth
                                 label='email'
                                 type='email'
                                 name='email'
@@ -80,6 +81,7 @@ const Register = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
+                                fullWidth
                                 label='username'
                                 type='username'
                                 name='username'
@@ -93,6 +95,7 @@ const Register = () => {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
+                                fullWidth
                                 label='password'
                                 type='password'
                                 name='password'

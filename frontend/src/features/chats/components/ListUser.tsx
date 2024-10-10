@@ -33,7 +33,6 @@ const ListUser: React.FC<Props> = ({ user }) => {
                 borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
                 padding: '10px 20px',
                 width: '100%',
-                maxWidth: '400px',
                 '&:hover': {
                     backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 },

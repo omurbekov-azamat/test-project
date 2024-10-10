@@ -37,27 +37,29 @@ const AddChat = () => {
     };
 
     return (
-        <Box textAlign={'center'}>
-            <Button variant="outlined" onClick={handleClickOpen} fullWidth>Add user</Button>
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>Add user</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label='username'
-                        type='username-area'
-                        name='username'
-                        value={username}
-                        onChange={inputChangeHandler}
-                        required
-                        fullWidth
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>cancel</Button>
-                    <Button onClick={handleConfirmAdd} color="success">add</Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+        !user.is_admin ? (
+            <Box textAlign={'center'}>
+                <Button variant="outlined" onClick={handleClickOpen} fullWidth>Add user</Button>
+                <Dialog open={open} onClose={handleClose}>
+                    <DialogTitle>Add user</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            label='username'
+                            type='username-area'
+                            name='username'
+                            value={username}
+                            onChange={inputChangeHandler}
+                            required
+                            fullWidth
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose}>cancel</Button>
+                        <Button onClick={handleConfirmAdd} color="success">add</Button>
+                    </DialogActions>
+                </Dialog>
+            </Box>
+        ) : null
     );
 };
 

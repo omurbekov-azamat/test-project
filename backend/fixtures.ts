@@ -48,7 +48,8 @@ const mysqlDb = {
                     password VARCHAR(255),
                     image VARCHAR(255),
                     token VARCHAR(255),
-                    online BOOLEAN DEFAULT true
+                    online BOOLEAN DEFAULT false,
+                    is_admin BOOLEAN DEFAULT false
                 );
             `);
 
@@ -76,12 +77,13 @@ const mysqlDb = {
             const password1 = await bcrypt.hash('123', 10);
 
             await connection!.query(`
-                INSERT INTO users (username, email, password, image, token, online)
-                VALUES 
-                    ('user1', 'user1@test.com', ?, '1.jpg', '123', true),
-                    ('user2', 'user2@test.com', ?, '2.jpg', '1234', true),
-                    ('user3', 'user3@test.com', ?, '3.jpg', '12345', true);
-            `, [password1, password1, password1]);
+                    INSERT INTO users (username, email, password, image, token, online, is_admin)
+                    VALUES (?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?),(?, ?, ?, ?, ?, ?, ?),
+                    (?, ?, ?, ?, ?, ?, ?);`, [
+                    'user1', 'user1@test.com', password1, '1.jpg', '123', false, false,
+                    'user2', 'user2@test.com', password1, '2.jpg', '1234', false, false,
+                    'user3', 'user3@test.com', password1, '3.jpg', '12345', false, false,
+                    'admin', 'admin@gmail.com', password1, '3.jpg', '123456', false, true]);
 
             await connection!.query(`
                 INSERT INTO messages (sender_id, receiver_id, text, image)
@@ -89,8 +91,7 @@ const mysqlDb = {
                     (1, 2, 'Hello, how are you?', NULL),
                     (2, 1, 'I am good, thank you!', NULL),
                     (2, 1, 'What about you?', NULL),
-                    (3, 1, NULL, '4.jpg')
-            `);
+                    (3, 1, NULL, 'fixtures/img1.jpg')`);
 
             console.log('Fixtures inserted');
         } catch (error) {

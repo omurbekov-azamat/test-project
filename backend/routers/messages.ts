@@ -53,11 +53,6 @@ messagesRouter.get('/:id', auth, async (req, res) => {
             ORDER BY created_at ASC`,
             [senderId, recipientId, recipientId, senderId]);
 
-        if (messages.length === 0) {
-             res.status(404).json({ message: 'No messages found' });
-             return;
-        }
-
          res.json(messages);
     } catch (error) {
         console.error('Error fetching messages:', error);

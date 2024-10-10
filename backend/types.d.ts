@@ -6,6 +6,7 @@ export interface IUser {
     image: string | null;
     online: boolean;
     token: string;
+    is_admin: boolean;
 }
 
 export interface IMessage {

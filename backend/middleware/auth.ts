@@ -4,7 +4,7 @@ import {RowDataPacket} from 'mysql2/promise';
 import {IUser} from '../types';
 
 export interface RequestWithUser extends Request {
-    user?: Pick<IUser, 'id' | 'email' | 'username' | 'token'>;
+    user?: Pick<IUser, 'id' | 'email' | 'username' | 'token' | 'is_admin'>;
 }
 
 const auth = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -36,6 +36,7 @@ const auth = async (req: RequestWithUser, res: Response, next: NextFunction): Pr
             email: user.email,
             username: user.username,
             token: user.token,
+            is_admin: user.is_admin,
         };
 
         next();

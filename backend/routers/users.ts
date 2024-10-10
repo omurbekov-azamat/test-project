@@ -94,8 +94,8 @@ usersRouter.post('/sessions', async (req, res, next) => {
         await connection.query('UPDATE users SET online = ?, token = ? WHERE id = ?',
             [true, token, findUser.id]);
 
-        const {id, email, username, image} = findUser;
-        const user = {id, email, username, image, online: true, token};
+        const {id, email, username, image, is_admin} = findUser;
+        const user = {id, email, username, image, online: true, token, is_admin};
 
         res.send({message: 'Username and password correct', user});
         return;
@@ -135,16 +135,32 @@ usersRouter.get('/', auth, async (req: Request, res: Response) => {
 
     try {
         const reqWithUser = req as RequestWithUser;
-        const user = reqWithUser.user;
+        const user = reqWithUser.user!;
         connection = await mysqlDb.getConnection();
 
-        const [users]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
-            `SELECT DISTINCT u.id, u.username, u.token, u.image, u.online FROM users u
-                JOIN messages m ON (u.id = m.receiver_id OR u.id = m.sender_id)
-                WHERE (m.sender_id = ? OR m.receiver_id = ?) AND u.id != ?`,
-            [user?.id, user?.id, user?.id]);
-
-        res.send(users);
+        // const [users]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
+        //     `SELECT DISTINCT u.id, u.username, u.token, u.image, u.online FROM users u
+        //         JOIN messages m ON (u.id = m.receiver_id OR u.id = m.sender_id)
+        //         WHERE (m.sender_id = ? OR m.receiver_id = ?) AND u.id != ?`,
+        //     [user?.id, user?.id, user?.id]);
+        //
+        // res.send(users);
+        if (user?.is_admin) {
+            const [allUsers]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
+                'SELECT id, username, token, image, online FROM users WHERE id != ?',
+                [user.id]
+            );
+            res.send(allUsers);
+        } else {
+            // Если не администратор, возвращаем только пользователей, связанных с сообщениями
+            const [users]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
+                `SELECT DISTINCT u.id, u.username, u.token, u.image, u.online FROM users u
+                    JOIN messages m ON (u.id = m.receiver_id OR u.id = m.sender_id)
+                    WHERE (m.sender_id = ? OR m.receiver_id = ?) AND u.id != ?`,
+                [user?.id, user?.id, user?.id]
+            );
+            res.send(users);
+        }
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).send({error: 'Internal server error'});

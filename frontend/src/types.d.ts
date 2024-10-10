@@ -21,6 +21,7 @@ export interface User {
     image: string;
     token: string;
     online: boolean;
+    is_admin: boolean;
 }
 export interface RegisterResponse {
     user: User;

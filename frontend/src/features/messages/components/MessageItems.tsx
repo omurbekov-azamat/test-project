@@ -10,9 +10,7 @@ const MessageItems = () => {
 
     const renderedMessages = useMemo(() => {
         return messages.map((message) => (
-            <div key={message.id}>
-                <MessageItem message={message}/>
-            </div>
+            <MessageItem key={message.id+1} message={message} />
         ));
     }, [messages]);
 

@@ -46,3 +46,14 @@ export interface Group {
     id: string;
     name: string;
 }
+
+export interface MemberChat {
+    userId: string;
+    username: string;
+}
+
+export interface GroupData {
+    groupId: string;
+    messages: Message[],
+    users: MemberChat[],
+}

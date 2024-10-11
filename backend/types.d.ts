@@ -17,3 +17,12 @@ export interface IMessage {
     image: string | null;
     createdAt: string;
 }
+
+interface IGroup {
+    message_id: number;
+    sender_id: number | null;
+    message_text: string | null;
+    message_created_at: Date;
+    user_id: number;
+    username: string;
+}

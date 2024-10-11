@@ -1,6 +1,7 @@
 import {createSlice} from "@reduxjs/toolkit";
 import {getMessages, sendMessage} from "./messagesThunks";
 import {RootState} from "../../app/store";
+import {getGroupMessages} from "../groups/groupsThunks";
 import {Message} from "../../types";
 
 interface MessagesState {
@@ -43,6 +44,12 @@ export const messagesSlice = createSlice({
         });
         builder.addCase(sendMessage.rejected, (state, payload) => {
             state.sendMessageLoading = false;
+        });
+        builder.addCase(getGroupMessages.pending, (state, {payload: groups}) => {
+           state.messages = [];
+        });
+        builder.addCase(getGroupMessages.fulfilled, (state, {payload: groups}) => {
+            state.messages = groups.messages;
         });
     },
 });

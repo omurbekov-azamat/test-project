@@ -2,11 +2,13 @@ import React, {useEffect, useState} from 'react';
 import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 import {useAppDispatch, useAppSelector} from "../../../app/hook";
 import {selectUser} from "../../users/usersSlice";
-import {getGroups} from "../groupsThunks";
+import {getGroupMessages, getGroups} from "../groupsThunks";
 import {selectGroups} from "../groupsSlice";
+import {useNavigate} from "react-router-dom";
 
 const SelectGroup = () => {
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
     const user = useAppSelector(selectUser)!;
     const groups = useAppSelector(selectGroups);
 
@@ -18,8 +20,9 @@ const SelectGroup = () => {
 
     const handleInputChange = (event: SelectChangeEvent) => {
         const value = event.target.value;
-        setSelectedGroup(value);
-        console.log(value)
+        setSelectedGroup(null);
+        navigate(`/groups/${value}`);
+        dispatch(getGroupMessages({id:value, token: user.token}));
     };
 
     return (

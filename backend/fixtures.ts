@@ -121,7 +121,7 @@ const mysqlDb = {
                     (2, 1, 'I am good, thank you!', NULL, NULL),
                     (2, 1, 'What about you?', NULL, NULL),
                     (1, NULL,'Hi Family', 1,  NULL),
-                    (1, NULL, 'Hi Family', 2,  NULL),
+                    (1, NULL, 'Hi Friends', 2,  NULL),
                     (3, 1, NULL, NULL,'fixtures/img1.jpg')`,
             );
 

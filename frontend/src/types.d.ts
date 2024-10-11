@@ -28,9 +28,10 @@ export interface RegisterResponse {
 }
 
 export interface MessageMutation {
-    receiver_id: string;
     text: string;
+    receiver_id: string | null;
     image: File | null;
+    chat_group_id: string | null;
 }
 
 export interface Message {

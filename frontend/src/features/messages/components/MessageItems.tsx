@@ -3,6 +3,7 @@ import {useAppSelector} from "../../../app/hook";
 import {selectMessages} from "../messagesSlice";
 import {Box} from "@mui/material";
 import MessageItem from "./MessageItem";
+import { v4 as uuidv4 } from 'uuid';
 
 const MessageItems = () => {
     const messages = useAppSelector(selectMessages);
@@ -10,7 +11,7 @@ const MessageItems = () => {
 
     const renderedMessages = useMemo(() => {
         return messages.map((message) => (
-            <MessageItem key={message.id+1} message={message} />
+            <MessageItem key={uuidv4()} message={message}/>
         ));
     }, [messages]);
 

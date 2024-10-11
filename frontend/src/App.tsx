@@ -25,7 +25,7 @@ function App() {
                         <Chat/>
                     </ProtectedRoute>
                 }/>
-                <Route path='/groups/:id' element={
+                <Route path='/groups/:groupId' element={
                     <ProtectedRoute isAllowed={user && Boolean(user)}>
                         <Chat/>
                     </ProtectedRoute>

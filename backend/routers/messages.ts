@@ -1,4 +1,4 @@
-import auth, { RequestWithUser } from "../middleware/auth";
+import auth, {RequestWithUser} from "../middleware/auth";
 import express from "express";
 import mysqlDb from "../mysqlDb";
 import {imagesUpload} from "../multer";
@@ -15,17 +15,28 @@ messagesRouter.post('/', auth, imagesUpload.single('image'), async (req, res, ne
         const reqWithUser = req as RequestWithUser;
         const user = reqWithUser.user;
         const senderId = user?.id!;
-        const {text, receiver_id} = req.body;
+        const {text, receiver_id, chat_group_id} = req.body;
         const image = req.file ? req.file.filename : null;
 
-        const [result] = await connection.query<OkPacket>(
-            'INSERT INTO messages (sender_id, receiver_id, text, image) VALUES (?, ?, ?, ?)',
-            [senderId, receiver_id, text, image],);
+        let result;
 
+        if (receiver_id) {
+            [result] = await connection.query<OkPacket>(
+                'INSERT INTO messages (sender_id, receiver_id, text, image) VALUES (?, ?, ?, ?)',
+                [senderId, receiver_id, text, image]
+            );
+        } else if (chat_group_id) {
+            [result] = await connection.query<OkPacket>(
+                'INSERT INTO messages (sender_id, receiver_id, chat_group_id, text, image) VALUES (?, NULL, ?, ?, ?)',
+                [senderId, chat_group_id, text, image]
+            );
+        } else {
+            res.status(400).send({message: 'Either receiver_id or chat_group_id must be provided.'});
+            return;
+        }
         res.status(201).send({message: 'Message created successfully', messageId: result.insertId});
-        return;
     } catch (e) {
-        console.error('Error creating user:', e);
+        console.error('Error creating message:', e);
         next(e);
     }
 });
@@ -41,7 +52,7 @@ messagesRouter.get('/:id', auth, async (req, res) => {
         const senderId = user?.id!;
 
         if (!recipientId || isNaN(recipientId)) {
-            res.status(400).json({ error: 'Invalid recipient ID' });
+            res.status(400).json({error: 'Invalid recipient ID'});
             return;
         }
 
@@ -53,10 +64,10 @@ messagesRouter.get('/:id', auth, async (req, res) => {
             ORDER BY created_at ASC`,
             [senderId, recipientId, recipientId, senderId]);
 
-         res.json(messages);
+        res.json(messages);
     } catch (error) {
         console.error('Error fetching messages:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({error: 'Internal Server Error'});
     } finally {
         if (connection) {
             connection.release();

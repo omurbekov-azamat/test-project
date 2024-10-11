@@ -27,3 +27,14 @@ export const getGroupMessages = createAsyncThunk<GroupData, { id: string, token:
         }
     }
 );
+
+export const createNewGroup = createAsyncThunk<void, {groupName: string, users: string[], token: string}>(
+    'groups/createNewGroup',
+    async (data) => {
+        try {
+            await axiosApi.post('groups/create-group', data, {headers: {'Authorization': data.token}});
+        } catch (e) {
+            throw e;
+        }
+    }
+)

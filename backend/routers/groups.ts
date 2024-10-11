@@ -79,7 +79,46 @@ groupsRouter.get('/:id', async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Error fetching messages and users:', error);
-        res.status(500).send({ error: 'Internal server error' });
+        res.status(500).send({error: 'Internal server error'});
+    } finally {
+        if (connection) {
+            connection.release();
+        }
+    }
+});
+
+groupsRouter.post('/create-group', auth, async (req: RequestWithUser, res: Response) => {
+    const { groupName, users } = req.body;
+    const currentUserId = req.user?.id;
+    let connection;
+
+    if (!groupName || !Array.isArray(users)) {
+        res.status(400).json({ error: 'Group name and user IDs are required.' });
+        return;
+    }
+
+    try {
+        connection = await mysqlDb.getConnection();
+
+        const [result]: [any, any] = await connection.query(`
+            INSERT INTO chat_groups (name) VALUES (?);
+        `, [groupName]);
+
+        const groupId = result.insertId;
+
+        if (currentUserId && !users.includes(currentUserId)) {
+            users.push(currentUserId);
+        }
+
+        const userValues = users.map(userId => [groupId, userId]);
+        await connection.query(`
+            INSERT INTO group_members (chat_group_id, user_id) VALUES ?;
+        `, [userValues]);
+
+        res.status(201).json({ message: 'Group created successfully', groupId });
+    } catch (error) {
+        console.error('Error creating group:', error);
+        res.status(500).json({ error: 'Internal server error' });
     } finally {
         if (connection) {
             connection.release();

@@ -5,9 +5,10 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import {Checkbox, FormControlLabel, FormGroup, Menu, TextField} from "@mui/material";
 import {useState} from "react";
-import {useAppSelector} from "../../../app/hook";
-import {selectUsers} from "../../users/usersSlice";
+import {useAppDispatch, useAppSelector} from "../../../app/hook";
+import {selectUser, selectUsers} from "../../users/usersSlice";
 import {v4 as uuidv4} from "uuid";
+import {createNewGroup, getGroups} from "../groupsThunks";
 
 const style = {
     position: 'absolute',
@@ -26,10 +27,12 @@ const initialState = {
 };
 
 const CreateGroup = () => {
+    const dispatch = useAppDispatch();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState(initialState);
     const handleOpen = () => setOpen(true);
     const users = useAppSelector(selectUsers);
+    const user = useAppSelector(selectUser)!;
 
     const [chooseUsers, setChooseUsers] = useState<string[]>([]);
 
@@ -53,7 +56,7 @@ const CreateGroup = () => {
     };
 
     const handleChangeCheckBox = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, checked } = e.target;
+        const {name, checked} = e.target;
 
         if (checked) {
             const result = users.find(item => item.username === name);
@@ -67,10 +70,8 @@ const CreateGroup = () => {
 
     const submitFormHandler = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log({
-            groupName: formData.groupName,
-            users: chooseUsers,
-        });
+        await dispatch(createNewGroup({groupName: formData.groupName, users: chooseUsers, token: user.token}));
+        await dispatch(getGroups(user.token));
         handleClose();
     };
 
@@ -94,31 +95,31 @@ const CreateGroup = () => {
                             required
                             fullWidth
                         />
-                            <Button
-                                fullWidth
-                                onClick={handleClickOpenChooseUsers}
-                                sx={{
-                                    color: 'grey',
-                                    height: '39px',
-                                    border: '1px solid lightblue',
-                                    textTransform: 'capitalize',
-                                    fontSize: '18px',
-                                    width: '100%'
-                                }}
-                            >
-                                Choose users
-                            </Button>
-                            <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)}
-                                  onClose={handleClickCloseChooseUsers}>
-                                <FormGroup sx={{p: 1, width: '100%'}}>
-                                    {users && users.length > 0 ? users.map((user) => (
-                                        <FormControlLabel
-                                            key={uuidv4()}
-                                            control={<Checkbox onChange={handleChangeCheckBox} name={user.username}/>}
-                                            label={user.username}/>
-                                    )) : (<Typography>no users</Typography>)}
-                                </FormGroup>
-                            </Menu>
+                        <Button
+                            fullWidth
+                            onClick={handleClickOpenChooseUsers}
+                            sx={{
+                                color: 'grey',
+                                height: '39px',
+                                border: '1px solid lightblue',
+                                textTransform: 'capitalize',
+                                fontSize: '18px',
+                                width: '100%'
+                            }}
+                        >
+                            Choose users
+                        </Button>
+                        <Menu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)}
+                              onClose={handleClickCloseChooseUsers}>
+                            <FormGroup sx={{p: 1, width: '100%'}}>
+                                {users && users.length > 0 ? users.map((user) => (
+                                    <FormControlLabel
+                                        key={uuidv4()}
+                                        control={<Checkbox onChange={handleChangeCheckBox} name={user.username}/>}
+                                        label={user.username}/>
+                                )) : (<Typography>no users</Typography>)}
+                            </FormGroup>
+                        </Menu>
                         <Button type="submit" fullWidth>create</Button>
                     </Box>
                 </Box>

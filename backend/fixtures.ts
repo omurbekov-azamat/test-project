@@ -54,15 +54,35 @@ const mysqlDb = {
             `);
 
             await connection!.query(`
+                CREATE TABLE chat_groups (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    name VARCHAR(255) NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            `);
+
+            await connection!.query(`
+                CREATE TABLE group_members (
+                    chat_group_id INT NOT NULL,
+                    user_id INT NOT NULL,
+                    FOREIGN KEY (chat_group_id) REFERENCES chat_groups(id) ON DELETE CASCADE,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                    PRIMARY KEY (chat_group_id, user_id)
+                )
+            `);
+
+            await connection!.query(`
                 CREATE TABLE messages (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     sender_id INT NOT NULL,
                     receiver_id INT NULL,
+                    chat_group_id INT NULL,
                     text TEXT,
                     image VARCHAR(255),
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-                    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+                    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+                    FOREIGN KEY (chat_group_id) REFERENCES chat_groups(id) ON DELETE CASCADE
                 );
             `);
 
@@ -86,12 +106,24 @@ const mysqlDb = {
                     'admin', 'admin@gmail.com', password1, '3.jpg', '123456', false, true]);
 
             await connection!.query(`
-                INSERT INTO messages (sender_id, receiver_id, text, image)
+                    INSERT INTO chat_groups (name) VALUES ('Family Group'), ('Friends Group');
+            `);
+
+            await connection!.query(`
+                    INSERT INTO group_members (chat_group_id, user_id)
+                    VALUES (1, 1), (1, 2), (2, 1), (2, 3);
+            `);
+
+            await connection!.query(`
+                INSERT INTO messages (sender_id, receiver_id, text, chat_group_id, image)
                 VALUES 
-                    (1, 2, 'Hello, how are you?', NULL),
-                    (2, 1, 'I am good, thank you!', NULL),
-                    (2, 1, 'What about you?', NULL),
-                    (3, 1, NULL, 'fixtures/img1.jpg')`);
+                    (1, 2, 'Hello, how are you?', NULL, NULL),
+                    (2, 1, 'I am good, thank you!', NULL, NULL),
+                    (2, 1, 'What about you?', NULL, NULL),
+                    (1, NULL,'Hi Family', 1,  NULL),
+                    (1, NULL, 'Hi Family', 2,  NULL),
+                    (3, 1, NULL, NULL,'fixtures/img1.jpg')`,
+            );
 
             console.log('Fixtures inserted');
         } catch (error) {

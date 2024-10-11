@@ -138,13 +138,6 @@ usersRouter.get('/', auth, async (req: Request, res: Response) => {
         const user = reqWithUser.user!;
         connection = await mysqlDb.getConnection();
 
-        // const [users]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
-        //     `SELECT DISTINCT u.id, u.username, u.token, u.image, u.online FROM users u
-        //         JOIN messages m ON (u.id = m.receiver_id OR u.id = m.sender_id)
-        //         WHERE (m.sender_id = ? OR m.receiver_id = ?) AND u.id != ?`,
-        //     [user?.id, user?.id, user?.id]);
-        //
-        // res.send(users);
         if (user?.is_admin) {
             const [allUsers]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
                 'SELECT id, username, token, image, online FROM users WHERE id != ?',
@@ -152,7 +145,6 @@ usersRouter.get('/', auth, async (req: Request, res: Response) => {
             );
             res.send(allUsers);
         } else {
-            // Если не администратор, возвращаем только пользователей, связанных с сообщениями
             const [users]: [RowDataPacket[], any] = await connection.query<RowDataPacket[]>(
                 `SELECT DISTINCT u.id, u.username, u.token, u.image, u.online FROM users u
                     JOIN messages m ON (u.id = m.receiver_id OR u.id = m.sender_id)
@@ -245,6 +237,6 @@ usersRouter.post('/addUser', auth, async (req: Request, res: Response) => {
             connection.release();
         }
     }
-})
+});
 
 export default usersRouter;

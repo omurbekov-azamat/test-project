@@ -41,3 +41,8 @@ export interface Message {
     text: string | null;
     created_at: sring;
 }
+
+export interface Group {
+    id: string;
+    name: string;
+}

@@ -21,7 +21,7 @@ const AppToolbar = () => {
         <AppBar position="sticky" sx={{background: '#292961;', py: 2, mb: 1}}>
             <Container maxWidth='xl'>
                 <Toolbar>
-                    <Grid container alignItems='center'>
+                    <Grid container alignItems='center' justifyContent='space-between'>
                         <Grid item xs={12} sm={2}>
                             <Typography variant="h6" component="div">
                                 <Link to='/' onClick={() => dispatch(clearMessages())}>Chat</Link>
@@ -50,7 +50,9 @@ const AppToolbar = () => {
                                     </Grid>
                                 </Grid>
                             ) : (
-                                <AnonymousMenu/>
+                                <Grid container justifyContent="flex-end">
+                                    <AnonymousMenu />
+                                </Grid>
                             )}
                         </Grid>
                     </Grid>

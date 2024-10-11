@@ -7,8 +7,6 @@ import {IMessage} from "../types";
 
 const messagesRouter = express.Router();
 
-type MessageRow = IMessage & RowDataPacket;
-
 messagesRouter.post('/', auth, imagesUpload.single('image'), async (req, res, next) => {
     try {
         const connection = await mysqlDb.getConnection();
@@ -56,12 +54,15 @@ messagesRouter.get('/:id', auth, async (req, res) => {
             return;
         }
 
-        const [messages]: [MessageRow[], any] = await connection!.query(`
-            SELECT sender_id, receiver_id, text, image, id,
-            DATE_FORMAT(created_at, '%d/%m/%y %H:%i') AS created_at
-            FROM messages WHERE (sender_id = ? AND receiver_id = ?)
-            OR (sender_id = ? AND receiver_id = ?)
-            ORDER BY created_at ASC`,
+        const [messages]: [any[], any] = await connection!.query(`
+            SELECT m.sender_id, m.receiver_id, m.text, m.image, m.id,
+                   u.username AS sender_name,
+                   DATE_FORMAT(m.created_at, '%d/%m/%y %H:%i') AS created_at
+            FROM messages m
+            JOIN users u ON m.sender_id = u.id
+            WHERE (m.sender_id = ? AND m.receiver_id = ?)
+            OR (m.sender_id = ? AND m.receiver_id = ?)
+            ORDER BY m.created_at ASC`,
             [senderId, recipientId, recipientId, senderId]);
 
         res.json(messages);

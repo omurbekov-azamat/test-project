@@ -3,7 +3,6 @@ import ListUsers from "../features/chats/components/ListUsers";
 import MessageForm from "../features/messages/components/MessageForm";
 import { Card, Grid } from "@mui/material";
 import MessageItems from "../features/messages/components/MessageItems";
-import AddChat from "../components/UI/AddChat/AddChat";
 import SelectGroup from "../features/groups/components/SelectGroup";
 
 const Chat = () => {
@@ -15,7 +14,6 @@ const Chat = () => {
                     maxHeight: { xs: '26vh'},
                     minHeight: { xs: '26vh',   sm: '80vh'},
                 }}>
-                    <AddChat />
                     <SelectGroup/>
                     <ListUsers />
                 </Grid>

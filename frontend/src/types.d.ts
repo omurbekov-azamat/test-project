@@ -40,7 +40,8 @@ export interface Message {
     receiver_id: string;
     image: string | null;
     text: string | null;
-    created_at: sring;
+    created_at: string;
+    sender_name:string;
 }
 
 export interface Group {

@@ -36,7 +36,7 @@ const MessageItem: React.FC<Props> = ({message}) => {
                     alt={message.text || 'Attached'}
                 />) : null}
                 {message.text && (
-                    <Typography variant="body1">{message.text}</Typography>
+                    <Typography variant="body1">{message.sender_name}: {message.text}</Typography>
                 )}
                 <Typography variant="caption" sx={{textAlign: 'right', color: 'grey', fontWeight: '300'}}>
                     {message.created_at}

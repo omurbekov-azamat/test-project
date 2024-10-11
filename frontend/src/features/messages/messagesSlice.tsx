@@ -2,18 +2,20 @@ import {createSlice} from "@reduxjs/toolkit";
 import {getMessages, sendMessage} from "./messagesThunks";
 import {RootState} from "../../app/store";
 import {getGroupMessages} from "../groups/groupsThunks";
-import {Message} from "../../types";
+import {MemberChat, Message} from "../../types";
 
 interface MessagesState {
     messages: Message[];
     getMessagesLoading: boolean;
     sendMessageLoading: boolean;
+    groupMembers: MemberChat[]
 }
 
 const initialState: MessagesState = {
     messages: [],
     getMessagesLoading: false,
     sendMessageLoading: false,
+    groupMembers: [],
 }
 
 export const messagesSlice = createSlice({
@@ -50,6 +52,7 @@ export const messagesSlice = createSlice({
         });
         builder.addCase(getGroupMessages.fulfilled, (state, {payload: groups}) => {
             state.messages = groups.messages;
+            state.groupMembers = groups.users;
         });
     },
 });
@@ -59,3 +62,4 @@ export const { clearMessages } = messagesSlice.actions;
 
 export const selectMessages = (state: RootState) => state.messages.messages;
 export const selectSendMessageLoading = (state: RootState) => state.messages.sendMessageLoading;
+export const selectGroupMembers = (state: RootState) => state.messages.groupMembers;
